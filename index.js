@@ -1,4 +1,4 @@
-// Générateur de clés de sécurité optimisé en mémoire, basé sur le crible d'Ératosthène et utilisant tous les caractères ASCII
+// Générateur de clés de sécurité optimisé en mémoire, avec plus de caractères ASCII et moins de nombres
 
 /**
  * Implémente le crible d'Ératosthène de manière optimisée en mémoire.
@@ -6,7 +6,6 @@
  * @returns {number[]} - Un tableau de nombres premiers.
  */
 function eratostheneSieve(limit) {
-    // Utilise un Uint8Array pour réduire l'empreinte mémoire
     const sieve = new Uint8Array(limit + 1).fill(1);
     sieve[0] = 0;
     sieve[1] = 0;
@@ -30,7 +29,7 @@ function eratostheneSieve(limit) {
 }
 
 /**
- * Génère une clé de sécurité à partir d'une liste de nombres premiers et de caractères ASCII.
+ * Génère une clé de sécurité avec plus de caractères ASCII et moins de nombres.
  * @param {number[]} primes - Liste de nombres premiers.
  * @param {number} length - Longueur souhaitée pour la clé.
  * @returns {string} - La clé de sécurité générée.
@@ -43,18 +42,21 @@ function generateSecurityKey(primes, length) {
 
     let key = '';
     for (let i = 0; i < length; i++) {
-        const randomIndexPrime = Math.floor(Math.random() * primes.length);
         const randomIndexChar = Math.floor(Math.random() * asciiChars.length);
-        
-        // Alterne entre un nombre premier et un caractère ASCII pour plus de variété
-        key += i % 2 === 0 ? primes[randomIndexPrime].toString() : asciiChars[randomIndexChar];
+        // Un nombre premier toutes les 4 positions, sinon un caractère ASCII
+        if (i % 4 === 0) {
+            const randomIndexPrime = Math.floor(Math.random() * primes.length);
+            key += primes[randomIndexPrime].toString();
+        } else {
+            key += asciiChars[randomIndexChar];
+        }
     }
     return key;
 }
 
-// Utilise un timestamp réduit (par exemple, modulo 1000000) pour éviter un crible trop grand
+// Utilise un timestamp réduit pour éviter un crible trop grand
 const timestamp = Math.floor(Date.now() / 1000);
-const limit = timestamp % 1000000; // Limite la taille du crible pour optimiser la mémoire
+const limit = timestamp % 100000; // Limite encore plus réduite pour l'exemple
 const primes = eratostheneSieve(limit);
 const keyLength = 32;
 const securityKey = generateSecurityKey(primes, keyLength);
