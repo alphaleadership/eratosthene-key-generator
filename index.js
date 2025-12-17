@@ -1,26 +1,27 @@
-// Générateur de clés de sécurité basé sur le crible d'Ératosthène et utilisant tous les caractères ASCII
+// Générateur de clés de sécurité optimisé en mémoire, basé sur le crible d'Ératosthène et utilisant tous les caractères ASCII
 
 /**
- * Implémente le crible d'Ératosthène pour trouver les nombres premiers jusqu'à une limite donnée.
+ * Implémente le crible d'Ératosthène de manière optimisée en mémoire.
  * @param {number} limit - La limite supérieure pour la recherche de nombres premiers.
  * @returns {number[]} - Un tableau de nombres premiers.
  */
 function eratostheneSieve(limit) {
-    const sieve = new Array(limit + 1).fill(true);
-    sieve[0] = false;
-    sieve[1] = false;
+    // Utilise un Uint8Array pour réduire l'empreinte mémoire
+    const sieve = new Uint8Array(limit + 1).fill(1);
+    sieve[0] = 0;
+    sieve[1] = 0;
 
     for (let i = 2; i <= Math.sqrt(limit); i++) {
-        if (sieve[i]) {
+        if (sieve[i] === 1) {
             for (let j = i * i; j <= limit; j += i) {
-                sieve[j] = false;
+                sieve[j] = 0;
             }
         }
     }
 
     const primes = [];
     for (let i = 2; i <= limit; i++) {
-        if (sieve[i]) {
+        if (sieve[i] === 1) {
             primes.push(i);
         }
     }
@@ -51,8 +52,9 @@ function generateSecurityKey(primes, length) {
     return key;
 }
 
-// Utilise le timestamp actuel (en secondes) comme limite pour le crible
-const limit = Math.floor(Date.now() / 1000);
+// Utilise un timestamp réduit (par exemple, modulo 1000000) pour éviter un crible trop grand
+const timestamp = Math.floor(Date.now() / 1000);
+const limit = timestamp % 1000000; // Limite la taille du crible pour optimiser la mémoire
 const primes = eratostheneSieve(limit);
 const keyLength = 32;
 const securityKey = generateSecurityKey(primes, keyLength);
