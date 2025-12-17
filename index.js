@@ -1,4 +1,4 @@
-// Générateur de clés de sécurité optimisé en mémoire, avec plus de caractères ASCII et moins de nombres
+// Générateur de clés de sécurité optimisé avec sélection de caractères spéciaux
 
 /**
  * Implémente le crible d'Ératosthène de manière optimisée en mémoire.
@@ -29,21 +29,26 @@ function eratostheneSieve(limit) {
 }
 
 /**
- * Génère une clé de sécurité avec plus de caractères ASCII et moins de nombres.
+ * Génère une clé de sécurité avec une sélection personnalisable de caractères.
  * @param {number[]} primes - Liste de nombres premiers.
  * @param {number} length - Longueur souhaitée pour la clé.
+ * @param {string[]} allowedSymbols - Liste des caractères spéciaux autorisés.
  * @returns {string} - La clé de sécurité générée.
  */
-function generateSecurityKey(primes, length) {
+function generateSecurityKey(primes, length, allowedSymbols = []) {
     const asciiChars = [];
     for (let i = 33; i <= 126; i++) {
-        asciiChars.push(String.fromCharCode(i));
+        const char = String.fromCharCode(i);
+        // N'inclut que les caractères alphanumériques ou les symboles autorisés
+        if (/[a-zA-Z0-9]/.test(char) || allowedSymbols.includes(char)) {
+            asciiChars.push(char);
+        }
     }
 
     let key = '';
     for (let i = 0; i < length; i++) {
         const randomIndexChar = Math.floor(Math.random() * asciiChars.length);
-        // Un nombre premier toutes les 4 positions, sinon un caractère ASCII
+        // Un nombre premier toutes les 4 positions, sinon un caractère ASCII/symbole
         if (i % 4 === 0) {
             const randomIndexPrime = Math.floor(Math.random() * primes.length);
             key += primes[randomIndexPrime].toString();
@@ -54,11 +59,14 @@ function generateSecurityKey(primes, length) {
     return key;
 }
 
+// Liste de symboles recommandés pour une clé robuste
+const safeSymbols = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '=', '+', '[', ']', '{', '}', ';', ':', ',', '<', '>', '.', '/', '?', '~', '|'];
+
 // Utilise un timestamp réduit pour éviter un crible trop grand
 const timestamp = Math.floor(Date.now() / 1000);
-const limit = timestamp % 100000; // Limite encore plus réduite pour l'exemple
+const limit = timestamp % 100000;
 const primes = eratostheneSieve(limit);
 const keyLength = 32;
-const securityKey = generateSecurityKey(primes, keyLength);
+const securityKey = generateSecurityKey(primes, keyLength, safeSymbols);
 
 console.log(`Clé de sécurité générée (${keyLength} caractères) : ${securityKey}`);
