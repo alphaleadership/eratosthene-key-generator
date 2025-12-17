@@ -1,4 +1,4 @@
-// Générateur de clés de sécurité basé sur le crible d'Ératosthène
+// Générateur de clés de sécurité basé sur le crible d'Ératosthène et utilisant tous les caractères ASCII
 
 /**
  * Implémente le crible d'Ératosthène pour trouver les nombres premiers jusqu'à une limite donnée.
@@ -29,24 +29,32 @@ function eratostheneSieve(limit) {
 }
 
 /**
- * Génère une clé de sécurité à partir d'une liste de nombres premiers.
+ * Génère une clé de sécurité à partir d'une liste de nombres premiers et de caractères ASCII.
  * @param {number[]} primes - Liste de nombres premiers.
  * @param {number} length - Longueur souhaitée pour la clé.
  * @returns {string} - La clé de sécurité générée.
  */
 function generateSecurityKey(primes, length) {
+    const asciiChars = [];
+    for (let i = 33; i <= 126; i++) {
+        asciiChars.push(String.fromCharCode(i));
+    }
+
     let key = '';
     for (let i = 0; i < length; i++) {
-        const randomIndex = Math.floor(Math.random() * primes.length);
-        key += primes[randomIndex].toString();
+        const randomIndexPrime = Math.floor(Math.random() * primes.length);
+        const randomIndexChar = Math.floor(Math.random() * asciiChars.length);
+        
+        // Alterne entre un nombre premier et un caractère ASCII pour plus de variété
+        key += i % 2 === 0 ? primes[randomIndexPrime].toString() : asciiChars[randomIndexChar];
     }
     return key;
 }
 
-// Exemple d'utilisation
-const limit = 1000;
+// Utilise le timestamp actuel (en secondes) comme limite pour le crible
+const limit = Math.floor(Date.now() / 1000);
 const primes = eratostheneSieve(limit);
-const keyLength = 16;
+const keyLength = 32;
 const securityKey = generateSecurityKey(primes, keyLength);
 
-console.log(`Clé de sécurité générée (${keyLength} chiffres) : ${securityKey}`);
+console.log(`Clé de sécurité générée (${keyLength} caractères) : ${securityKey}`);
